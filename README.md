@@ -1,16 +1,52 @@
-# seers_assignment2
+# 7 Seers Assignment 2
 
-7 Seers 2nd Assignment
+This is a Flutter project for the 7 Seers 2nd Assignment. The application displays a list of transactions from a mock API, allows adding new transactions, and provides sorting and filtering capabilities.
 
-## Getting Started
+## Framework Version
 
-This project is a starting point for a Flutter application.
+- **Flutter**: 3.22.2
+- **Dart**: 3.4.3
 
-A few resources to get you started if this is your first Flutter project:
+## Libraries Used
 
-- [Lab: Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Cookbook: Useful Flutter samples](https://docs.flutter.dev/cookbook)
+### State Management
 
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+- **flutter_redux**: `^0.10.0`
+- **redux**: `^5.0.0`
+- **redux_thunk**: `^0.4.0`
+
+### Navigation & Architecture
+
+- **get**: `^4.6.6`
+
+### UI & Layout
+
+- **flutter_layout_grid**: `^2.0.5`
+- **intl**: `^0.19.0`
+- **cupertino_icons**: `^1.0.8`
+
+### Networking
+
+- **http**: `^1.2.1`
+
+## Setup and Run Instructions
+
+1.  **Clone the repository:**
+
+    ```sh
+    git clone <repository-url>
+    cd seers_assignment2
+    ```
+
+2.  **Get dependencies:**
+
+    ```sh
+    flutter pub get
+    ```
+
+3.  **Run the application:**
+    ```sh
+    flutter run
+    ```
+
+This will launch the application on your connected device or emulator.
