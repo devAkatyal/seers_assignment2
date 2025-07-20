@@ -8,6 +8,8 @@ AppState appReducer(AppState state, dynamic action) {
     return state.copyWith(isLoading: false, transactions: action.transactions);
   } else if (action is FetchTransactionsFailureAction) {
     return state.copyWith(isLoading: false, error: action.error);
+  } else if (action is UpdateFilterOptionsAction) {
+    return state.copyWith(filterOptions: action.newOptions);
   } else if (action is AddTransactionAction) {
     // The list is refreshed by fetchTransactionsAction, but you could also manually add it:
     // final newTransactions = List<Transaction>.from(state.transactions)..add(action.transaction);

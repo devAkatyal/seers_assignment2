@@ -3,6 +3,7 @@ import 'package:http/http.dart' as http;
 import 'package:redux/redux.dart';
 import 'package:redux_thunk/redux_thunk.dart';
 import 'package:seers_assignment2/redux/models/app_state.dart';
+import 'package:seers_assignment2/redux/models/filter_options_model.dart';
 import 'package:seers_assignment2/redux/models/transaction_model.dart';
 
 // Action to signal the start of a network request
@@ -20,6 +21,13 @@ class FetchTransactionsFailureAction {
   final String error;
 
   FetchTransactionsFailureAction(this.error);
+}
+
+// Action to update the filter options
+class UpdateFilterOptionsAction {
+  final FilterOptions newOptions;
+
+  UpdateFilterOptionsAction(this.newOptions);
 }
 
 // Thunk action to fetch transactions from the API

@@ -6,6 +6,7 @@ import 'package:seers_assignment2/app/modules/transactions/transactions_controll
 import 'package:seers_assignment2/redux/actions/transaction_actions.dart';
 import 'package:seers_assignment2/redux/models/app_state.dart';
 import 'package:get/get.dart';
+import 'package:seers_assignment2/redux/models/filter_options_model.dart';
 import 'package:seers_assignment2/redux/models/transaction_model.dart';
 
 class TransactionsView extends GetView<TransactionsController> {
@@ -14,7 +15,22 @@ class TransactionsView extends GetView<TransactionsController> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Transactions')),
+      appBar: AppBar(
+        title: const Text('Transactions'),
+        actions: [
+          StoreConnector<AppState, VoidCallback>(
+            converter: (store) {
+              return () => _showFilterDialog(context, store);
+            },
+            builder: (context, callback) {
+              return IconButton(
+                icon: const Icon(Icons.filter_list),
+                onPressed: callback,
+              );
+            },
+          ),
+        ],
+      ),
       body: StoreConnector<AppState, _ViewModel>(
         converter: (store) => _ViewModel.fromStore(store),
         onInit: (store) => store.dispatch(fetchTransactionsAction()),
@@ -26,6 +42,7 @@ class TransactionsView extends GetView<TransactionsController> {
             return Center(child: Text('Error: ${vm.error}'));
           }
           return ListView.builder(
+            padding: const EdgeInsets.only(bottom: 72.0),
             itemCount: vm.transactions.length,
             itemBuilder: (context, index) {
               final transaction = vm.transactions[index];
@@ -55,9 +72,130 @@ class TransactionsView extends GetView<TransactionsController> {
           );
         },
       ),
-      floatingActionButton: FloatingActionButton(
+      floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
+      floatingActionButton: FloatingActionButton.extended(
         onPressed: () => _showAddTransactionDialog(context),
-        child: const Icon(Icons.add),
+        icon: const Icon(Icons.add),
+        label: const Text('Add Transaction'),
+      ),
+    );
+  }
+
+  void _showFilterDialog(BuildContext context, Store<AppState> store) {
+    final initialOptions = store.state.filterOptions;
+    SortBy sortBy = initialOptions.sortBy;
+    bool ascending = initialOptions.ascending;
+    String? type = initialOptions.type;
+
+    Get.dialog(
+      AlertDialog(
+        title: const Text('Filter and Sort'),
+        content: StatefulBuilder(
+          builder: (context, setDialogState) {
+            return SingleChildScrollView(
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  DropdownButtonFormField<SortBy>(
+                    value: sortBy,
+                    items:
+                        SortBy.values
+                            .map(
+                              (s) => DropdownMenuItem(
+                                value: s,
+                                child: Text(s.toString().split('.').last),
+                              ),
+                            )
+                            .toList(),
+                    onChanged: (value) {
+                      if (value != null) {
+                        setDialogState(() {
+                          sortBy = value;
+                        });
+                      }
+                    },
+                    decoration: const InputDecoration(labelText: 'Sort By'),
+                  ),
+                  Row(
+                    children: [
+                      const Text('Order:'),
+                      Radio<bool>(
+                        value: true,
+                        groupValue: ascending,
+                        onChanged: (value) {
+                          setDialogState(() {
+                            ascending = value!;
+                          });
+                        },
+                      ),
+                      const Text('Asc'),
+                      Radio<bool>(
+                        value: false,
+                        groupValue: ascending,
+                        onChanged: (value) {
+                          setDialogState(() {
+                            ascending = value!;
+                          });
+                        },
+                      ),
+                      const Text('Desc'),
+                    ],
+                  ),
+                  DropdownButtonFormField<String>(
+                    value: type,
+                    items:
+                        ['debit', 'credit']
+                            .map(
+                              (label) => DropdownMenuItem(
+                                child: Text(label),
+                                value: label,
+                              ),
+                            )
+                            .toList(),
+                    onChanged: (value) {
+                      setDialogState(() {
+                        type = value;
+                      });
+                    },
+                    decoration: const InputDecoration(labelText: 'Type'),
+                  ),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.end,
+                    children: [
+                      TextButton(
+                        onPressed: () {
+                          setDialogState(() {
+                            type = null;
+                          });
+                          final newOptions = store.state.filterOptions.copyWith(
+                            clearType: true,
+                          );
+                          store.dispatch(UpdateFilterOptionsAction(newOptions));
+                        },
+                        child: const Text('Clear Filters'),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+            );
+          },
+        ),
+        actions: [
+          TextButton(onPressed: () => Get.back(), child: const Text('Cancel')),
+          ElevatedButton(
+            onPressed: () {
+              final newOptions = store.state.filterOptions.copyWith(
+                sortBy: sortBy,
+                ascending: ascending,
+                type: type,
+              );
+              store.dispatch(UpdateFilterOptionsAction(newOptions));
+              Get.back();
+            },
+            child: const Text('Apply'),
+          ),
+        ],
       ),
     );
   }
@@ -164,7 +302,7 @@ class _ViewModel {
 
   static _ViewModel fromStore(Store<AppState> store) {
     return _ViewModel(
-      transactions: store.state.transactions,
+      transactions: store.state.filteredTransactions,
       isLoading: store.state.isLoading,
       error: store.state.error,
       onAddTransaction: (transaction) {
